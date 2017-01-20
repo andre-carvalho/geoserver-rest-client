@@ -1,0 +1,29 @@
+{
+    "name": "andre/js-geoserver-rest-client",
+    "description": "A Web component to upload and configuring a layer on GeoServer based on set of GeoTiffs and one SLD style document.",
+    "type": "project",
+    "license": "GPL",
+    "authors": [
+        {
+            "name": "andre.carvalho",
+            "email": "andre.carvalho@funcate.org.br"
+        }
+    ],
+    "require": {
+    	"php": ">=5.3",
+        "edwardstock/php-curl-class": "^1.0"
+    },
+	"config": {
+		"optimize-autoloader": true
+	},
+	"autoload": {
+        "psr-4": {
+                "Services\\": "src/services",
+                "DAO\\": "src/DAO",
+                "ValueObjects\\": "src/valueObjects"
+        }
+    },
+    "scripts": {
+		"test": "php tests/test.php"
+	}
+}
