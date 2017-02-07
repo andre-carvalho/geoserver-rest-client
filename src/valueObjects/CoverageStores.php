@@ -20,10 +20,8 @@ class CoverageStores {
 	function __construct($jsonResponse) {
 		$coverageStores=$jsonResponse->coverageStores->coverageStore;
 		
-		foreach ($coverageStores as $coverage) {
-			$coverageStore = new SimpleCoverageStore();
-			$coverageStore->name = $coverage->name;
-			$coverageStore->href = $coverage->href;
+		foreach ($coverageStores as $jsonCoverageStore) {
+			$coverageStore = new SimpleCoverageStore($jsonCoverageStore);
 			array_push($this->coverages, $coverageStore);
 		}
 	}

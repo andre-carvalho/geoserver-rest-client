@@ -31,16 +31,18 @@ class CoverageStore {
 		return $this;
 	}
 	
-	function __construct($jsonResponse) {
-		$coverageStore=$jsonResponse->coverageStore;
-		$this->name = $coverageStore->name;
-		$this->description = $coverageStore->description;
-		$this->type = $coverageStore->type;// "ImageMosaic"
-		$this->enabled = $coverageStore->enabled;// true or false
-		$this->workspace = new SimpleWorkspace($coverageStore->workspace);// the workspace related to this coverage store
-		$this->_default = $coverageStore->_default;
-		$this->fileLocation = $coverageStore->url;// path to directory where are stored the raster files 
-		$this->coveragesResource = $coverageStore->coverages;// url to request compose coverages used to current coverage
+	function __construct($jsonResponse=null) {
+		if(isset($jsonResponse)) {
+			$coverageStore=$jsonResponse->coverageStore;
+			$this->name = $coverageStore->name;
+			$this->description = $coverageStore->description;
+			$this->type = $coverageStore->type;// "ImageMosaic"
+			$this->enabled = $coverageStore->enabled;// true or false
+			$this->workspace = new SimpleWorkspace($coverageStore->workspace);// the workspace related to this coverage store
+			$this->_default = $coverageStore->_default;
+			$this->fileLocation = $coverageStore->url;// path to directory where are stored the raster files 
+			$this->coveragesResource = $coverageStore->coverages;// url to request compose coverages used to current coverage
+		}
 	}
 	
 	public function toXML() {
@@ -69,7 +71,7 @@ class CoverageStore {
 				'"description":"'.$this->description.'",'.
 				'"type":"'.$this->type.'",'.
 				'"enabled":'.( ($this->enabled)?('true'):('false') ).','.
-				'"workspace":{'.$this->workspace->toJSON().'},'.
+				'"workspace":'.$this->workspace->toJSON().','.
 				'"_default":'.( ($this->_default)?('true'):('false') ).','.
 				'"url":"'.$this->fileLocation.'",'.
 				'"coverages":"'.$this->coveragesResource.'"}}';

@@ -15,6 +15,11 @@ class SimpleCoverageStore {
 
 	private $name,$href;
 	
+	function __construct($jsonCoverageStore) {
+		$this->name = $jsonCoverageStore->name;
+		$this->href = $jsonCoverageStore->href;
+	}
+	
 	public function __get($property) {
 		if (property_exists($this, $property)) {
 			return $this->$property;

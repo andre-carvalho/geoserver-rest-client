@@ -16,9 +16,25 @@ class SimpleWorkspace {
 
 	private $name,$href;
 	
-	function __construct($jsonResponse) {
-		$this->name = $jsonResponse->name;
-		$this->href = $jsonResponse->href;
+	public function __get($property) {
+		if (property_exists($this, $property)) {
+			return $this->$property;
+		}
+	}
+	
+	public function __set($property, $value) {
+		if (property_exists($this, $property)) {
+			$this->$property = $value;
+		}
+	
+		return $this;
+	}
+	
+	function __construct($jsonResponse=null) {
+		if(isset($jsonResponse)) {
+			$this->name = $jsonResponse->name;
+			$this->href = $jsonResponse->href;
+		}
 	}
 
 	public function toJSON() {
