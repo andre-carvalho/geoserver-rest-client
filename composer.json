@@ -12,7 +12,8 @@
     "require": {
     	"php": ">=5.3",
         "edwardstock/php-curl-class": "^1.0",
-        "wayne-oliver/log": "^0.0.1"
+        "wayne-oliver/log": "^0.0.1",
+        "touki/ftp": "^1.2"
     },
 	"config": {
 		"optimize-autoloader": true

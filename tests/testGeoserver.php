@@ -22,7 +22,7 @@ function print_data($data) {
 
 $url = "http://localhost:8080/geoserver/";
 $workspace = "ESENSING";
-$nameDataDirectory = "uploadData";
+$nameDataDirectory = "MOD13Q1_pebol_ndvi_evi_nir_h13_v11";
 
 $gs = new Geoserver("admin", "geoserver", $url, $workspace);
 
@@ -34,13 +34,13 @@ if(is_object($cs)) {
 
 // Create a new Coverage Store
 $cs = new CoverageStore();
-$cs->fileLocation = "file:coverages/".$nameDataDirectory;
+$cs->fileLocation = "file:coverages/externalData/".$nameDataDirectory;
 $cs->name = $nameDataDirectory;
 $cs->description = "My CoverageStore via REST";
 $cs->type = "ImageMosaic";
 $cs->enabled = true;
 $cs->workspace = new SimpleWorkspace();
-$cs->workspace->name = "ESENSING";
+$cs->workspace->name = $workspace;
 
 // Using Object CoverageStore to registry a new Store on GeoServer
 if($gs->addCoverageStore($cs)===true) {

@@ -10,20 +10,47 @@ use ValueObjects\SimpleStyle;
 use ValueObjects\LayerDefaultStyle;
 use ValueObjects\SimpleLayer;
 
+/**
+ * @abstract Allow to communicate with one instance of GeoServer via REST API to register a set of geotiffs as Layers WMS.
+ * 
+ * @uses When run, a log file is generated on /var/log/geoserver_rest.
+ * If fail on make a directory to put the log files, the process should run using
+ * one user that have write permission to can write on /var/log directory.
+ * Users associate to syslog group on Linux can write on /var/log.
+ * Other way is change the log directory to /tmp/ when call the constructor.
+ * 
+ * @since January of 2017
+ * 
+ * @author andre
+ *
+ */
 class Geoserver {
 	
-	protected $auth = array();
+	protected $config = array();
 	protected $curl = null;
 	protected $logger = null;
-	protected $logFile = "/tmp/";
+	protected $logDir = null;
+	protected $logEnable = true;
 	
-	function __construct($user, $pass, $geoserver_url, $workspace_name) {
-		$this->logger = new Log($this->logFile);
+	function __construct($user, $pass, $geoserver_url, $workspace_name, $logDir="/var/log/geoserver_rest") {
 		
-		$this->auth["user"]=$user;
-		$this->auth["pass"]=$pass;
-		$this->auth["geoserver_url"]=$geoserver_url;
-		$this->auth["workspace_name"]=$workspace_name;
+		$this->logDir = $logDir;
+		
+		if ( !is_dir($this->logDir) ) {
+			if(!mkdir($this->logDir, 0777, true)) {
+				// Failed to create log folder. Disabling log!
+				$this->logEnable=false;
+			}
+		}
+		
+		if($this->logEnable) {
+			$this->logger = new Log($this->logDir);
+		}
+		
+		$this->config["user"]=$user;
+		$this->config["pass"]=$pass;
+		$this->config["geoserver_url"]=$geoserver_url;
+		$this->config["workspace_name"]=$workspace_name;
 		$this->curl = new Curl\Curl();
 		$this->curl->setBasicAuthentication($user, $pass);
 	}
@@ -32,7 +59,19 @@ class Geoserver {
 		$this->curl->close();
 	}
 	
+	private function writeWarningLog($msg="") {
+		if(!$this->logEnable) {
+			return false;
+		}
+		if(!empty($msg)) {
+			$this->logger->log_warn($msg);
+		}
+	}
+	
 	private function writeErrorLog($msg="") {
+		if(!$this->logEnable) {
+			return false;
+		}
 		if(!empty($msg)) {
 			$this->logger->log_error($msg);
 		}
@@ -50,8 +89,7 @@ class Geoserver {
 	public function getCoverageStores() {
 		$coverageStores = null;
 		
-		$request = "rest/workspaces/";
-		$URL = $this->auth["geoserver_url"].$request.$this->auth["workspace_name"]."/coveragestores.json";
+		$URL = $this->config["geoserver_url"]."rest/workspaces/".$this->config["workspace_name"]."/coveragestores.json";
 
 		$this->curl->get($URL);
 		
@@ -85,8 +123,7 @@ class Geoserver {
 	public function getCoverageStore($coverageStoreName) {
 		$coverageStore = null;
 	
-		$request = "rest/workspaces/";
-		$URL = $this->auth["geoserver_url"].$request.$this->auth["workspace_name"]."/coveragestores/".$coverageStoreName.".json";
+		$URL = $this->config["geoserver_url"]."rest/workspaces/".$this->config["workspace_name"]."/coveragestores/".$coverageStoreName.".json";
 	
 		$this->curl->get($URL);
 	
@@ -108,14 +145,13 @@ class Geoserver {
 	public function addCoverageStore($coverageStore) {
 		
 		if($this->getCoverageStore($coverageStore->name)!==false) {
-			$this->logger->log_warn("Coverage store exists!");
+			$this->writeWarningLog("Coverage store exists!");
 			return false;
 		}
 
 		$json = $coverageStore->toJSON();
 		
-		$request = "rest/workspaces/";
-		$URL = $this->auth["geoserver_url"].$request.$this->auth["workspace_name"]."/coveragestores.json";
+		$URL = $this->config["geoserver_url"]."rest/workspaces/".$this->config["workspace_name"]."/coveragestores.json";
 		
 		$this->curl->setOption(CURLOPT_HTTPHEADER, array("Content-Type: application/json", "Content-Length: " . strlen($json)));
 
@@ -132,14 +168,13 @@ class Geoserver {
 	
 	public function delCoverageStore($coverageStore) {
 		if($this->getCoverageStore($coverageStore->name)===false) {
-			$this->logger->log_warn("Coverage store no exists!");
+			$this->writeWarningLog("Coverage store no exists!");
 			return false;
 		}
 
 		$json = $coverageStore->toJSON();
 		
-		$request = "rest/workspaces/";
-		$URL = $this->auth["geoserver_url"].$request.$this->auth["workspace_name"]."/coveragestores/".$coverageStore->name."?recurse=true";
+		$URL = $this->config["geoserver_url"]."rest/workspaces/".$this->config["workspace_name"]."/coveragestores/".$coverageStore->name."?recurse=true";
 
 		$this->curl->delete($URL);
 		
@@ -154,8 +189,7 @@ class Geoserver {
 	public function getCoverage($coverageStoreName, $coverageName) {
 		$coverage = null;
 		
-		$request = "rest/workspaces/";
-		$URL = $this->auth["geoserver_url"].$request.$this->auth["workspace_name"]."/coveragestores/".$coverageStoreName."/coverages/".$coverageName.".json";
+		$URL = $this->config["geoserver_url"]."rest/workspaces/".$this->config["workspace_name"]."/coveragestores/".$coverageStoreName."/coverages/".$coverageName.".json";
 		
 		$this->curl->get($URL);
 		
@@ -177,19 +211,18 @@ class Geoserver {
 	public function addCoverage($coverageStore, $coverage) {
 		
 		if($this->getCoverageStore($coverageStore->name)===false) {
-			$this->logger->log_warn("Coverage store no exists!");
+			$this->writeWarningLog("Coverage store no exists!");
 			return false;
 		}
 		
 		if($this->getCoverage($coverageStore->name, $coverage->name)!==false) {
-			$this->logger->log_warn("Coverage exists!");
+			$this->writeWarningLog("Coverage exists!");
 			return false;
 		}
 		
 		$json = $coverage->toJSON();
 		
-		$request = "rest/workspaces/";
-		$URL = $this->auth["geoserver_url"].$request.$this->auth["workspace_name"]."/coveragestores/".$coverageStore->name."/coverages.json";
+		$URL = $this->config["geoserver_url"]."rest/workspaces/".$this->config["workspace_name"]."/coveragestores/".$coverageStore->name."/coverages.json";
 		
 		$this->curl->setOption(CURLOPT_HTTPHEADER, array("Content-Type: application/json", "Content-Length: " . strlen($json)));
 		
@@ -219,9 +252,8 @@ class Geoserver {
 		}
 		
 		$style = null;
-	
-		$request = "rest";
-		$URL = $this->auth["geoserver_url"].$request."/styles/".$styleName.".json";
+
+		$URL = $this->config["geoserver_url"]."rest/workspaces/".$this->config["workspace_name"]."/styles/".$styleName.".json";
 
 		$this->curl->get($URL);
 	
@@ -246,20 +278,39 @@ class Geoserver {
 		return $style;
 	}
 	
-	public function addStyle($style) {
+	public function addStyle($style, $styleFile) {
 		if($this->getStyle($style->name)!==false) {
-			$this->logger->log_warn("Style exists!");
+			$this->writeWarningLog("Style exists!");
 			return false;
 		}
 		
 		$json = $style->toJSON();
 		
-		$request = "rest";
-		$URL = $this->auth["geoserver_url"].$request."/styles";//".$style->name.".json";
+		$URL = $this->config["geoserver_url"]."rest/workspaces/".$this->config["workspace_name"]."/styles";
 		
 		$this->curl->setOption(CURLOPT_HTTPHEADER, array("Content-Type: application/json", "Content-Length: " . strlen($json)));
 		
 		$this->curl->post($URL, $json);
+		
+		if ($this->curl->error) {
+			$this->writeErrorLog();
+			return false;
+		}
+		
+		// upload file
+		$this->uploadStyle($style->name, $styleFile);
+		
+		return true;
+	}
+	
+	private function uploadStyle($styleName, $styleFile) {
+		$URL = $this->config["geoserver_url"]."rest/workspaces/".$this->config["workspace_name"]."/styles/".$styleName;
+		
+		$fileData=file_get_contents($styleFile);
+		
+		$this->curl->setOption(CURLOPT_HTTPHEADER, array("Content-Type: application/vnd.ogc.sld+xml", "Content-Length: " . strlen(stripslashes($fileData))));
+		
+		$this->curl->put($URL, $fileData);
 		
 		if ($this->curl->error) {
 			$this->writeErrorLog();
@@ -281,7 +332,7 @@ class Geoserver {
 	
 		$layer = null;
 	
-		$URL = $this->auth["geoserver_url"]."rest/layers/".$layerName.".json";
+		$URL = $this->config["geoserver_url"]."rest/layers/".$layerName.".json";
 	
 		$this->curl->get($URL);
 	
@@ -308,13 +359,13 @@ class Geoserver {
 	
 	public function applyStyleToLayer($layer, $defaultStyle) {
 		if($this->getStyle($defaultStyle->name)===false) {
-			$this->logger->log_warn("Style no exists!");
+			$this->writeWarningLog("Style no exists!");
 			return false;
 		}
 		$layer->defaultStyle=$defaultStyle;
 		$json = $layer->toJSON();
 		
-		$URL = $this->auth["geoserver_url"]."rest/layers/".$layer->name;//.".json";
+		$URL = $this->config["geoserver_url"]."rest/layers/".$layer->name;
 		
 		$this->curl->setOption(CURLOPT_HTTPHEADER, array("Content-Type: application/json", "Content-Length: " . strlen($json)));
 		
