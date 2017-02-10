@@ -1,6 +1,6 @@
 {
     "name": "andre/js-geoserver-rest-client",
-    "description": "A Web component to upload and configuring a layer on GeoServer based on set of GeoTiffs and one SLD style document.",
+    "description": "A Web Service to copy files from FTP Server and configuring a layer on GeoServer based on set of GeoTiffs and one SLD style document.",
     "type": "project",
     "license": "GPL",
     "authors": [
