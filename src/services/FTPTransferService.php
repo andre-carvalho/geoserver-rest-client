@@ -52,7 +52,7 @@ class FTPTransferService {
 		
 		$ftp = $factory->build ( $conn );
 		
-		$remoteDir = $ftp->findDirectoryByName ( $remoteServer ['directory'] );
+		$remoteDir = $ftp->findDirectoryByName ( $remoteServer ['directory'].$params ["sourceName"] );
 		
 		if (null === $remoteDir) {
 			$conn->close ();

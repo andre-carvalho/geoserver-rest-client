@@ -17,7 +17,7 @@ class ServiceConfiguration {
 				'host' => "geometadata.dpi.inpe.br",
 				'user' => "esensing",
 				'pass' => "esensing",
-				'directory' => "/home/esensing/MOD13Q1_pebol_ndvi_evi_nir_h13_v11" 
+				'directory' => "/home/esensing/" 
 		);
 		return $config;
 	}
