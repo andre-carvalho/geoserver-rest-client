@@ -15,11 +15,15 @@ Using recommended PHP scripts to make the server-side process [according the doc
 The expected environment to deployment is composed for:
 - Apache 2 HTTPD Server
 - PHP 5
-  - Install curl module on php.
+
+  -Install curl module on php.
+  
   ```
   apt-get install php5-curl
   ```
-  - Install the php composer on root directory of the project.
+  
+  -Install the php composer on root directory of the project.
+  
   ```
   wget https://getcomposer.org/download/1.3.2/composer.phar
   ```
