@@ -42,7 +42,7 @@ class UtilsService {
 	 */
 	public static function mkdir($dir) {
 		$old_umask = umask ( 0 );
-		if (mkdir ( $dir, 0777 ) === false) {
+		if (mkdir ( $dir, 0777, true ) === false) {
 			return false;
 		}
 		umask ( $old_umask );
@@ -69,7 +69,15 @@ class UtilsService {
 		echo "ftp_directory, the full path to directory where are the data in FTP server.";
 		echo "<br>";
 		echo "<h3>* This service allow only the GET method to requests.</h3>";
+		echo "<hr>";		
 		echo "<br>";
+		echo "<b>Optional parameters:</b>";
+		echo "<br>";
+		echo "overwrite, Used to overwrite all data if sourceName is already exists. The default behaviour is false.";
+		echo "<br>";
+		echo "useDefaults, To use the FTP parameters from configurations. The default value is false.";
+		echo "<br>";
+
 	}
 	/**
 	 * Validate input parameters provided by user via GET method.

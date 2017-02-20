@@ -20,12 +20,25 @@ function print_data($data) {
 	echo "\n\n";
 }
 
-$url = "http://localhost:8080/geoserver/";
-$workspace = "ESENSING";
+$url = "http://terrabrasilis.info/esensing/";
+$workspace = "E-SENSING";
 $nameDataDirectory = "MOD13Q1_pebol_ndvi_evi_nir_h13_v11";
 
 $gs = new Geoserver("admin", "geoserver", $url, $workspace);
 
+/*
+$cs=$gs->getCoverageStore($nameDataDirectory);
+
+if($cs!==false) {
+	echo "CoverageStore exists!";
+	echo "\n";
+	print_data($cs->toJSON());
+}else {
+	echo "Failure on get the coverageStore";
+}
+
+exit();
+*/
 // Get all Coverage Stores
 $cs=$gs->getCoverageStores();
 if(is_object($cs)) {
@@ -66,7 +79,7 @@ $style->name=$nameDataDirectory;
 $style->fileName=$nameDataDirectory.".sld";
 
 // Using Object SimpleStyle to registry a new Style on GeoServer
-if($gs->addStyle($style)===true) {
+if($gs->addStyle($style, "/var/www/publish/imageMosaic/tmp/MOD13Q1_pebol_ndvi_evi_nir_h13_v11/MOD13Q1_pebol_ndvi_evi_nir_h13_v11.sld")===true) {
 	echo "The SLD Style ".$style->name." was created";
 }else {
 	echo "Failure to create the style ".$style->name;

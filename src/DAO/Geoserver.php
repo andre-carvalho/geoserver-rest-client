@@ -1,7 +1,7 @@
 <?php
 namespace DAO;
 
-use EdwardStock\Curl;
+use LibCurl\LibCurl;
 use Log\Log;
 use ValueObjects\CoverageStores;
 use ValueObjects\CoverageStore;
@@ -32,7 +32,7 @@ class Geoserver {
 	protected $logDir = null;
 	protected $logEnable = true;
 	
-	function __construct($user, $pass, $geoserver_url, $workspace_name, $logDir="/var/log/geoserver_rest") {
+	function __construct($user, $pass, $geoserver_url, $workspace_name, $logDir="log/geoserver_rest") {
 		
 		$this->logDir = $logDir;
 		
@@ -51,7 +51,7 @@ class Geoserver {
 		$this->config["pass"]=$pass;
 		$this->config["geoserver_url"]=$geoserver_url;
 		$this->config["workspace_name"]=$workspace_name;
-		$this->curl = new Curl\Curl();
+		$this->curl = new LibCurl();
 		$this->curl->setBasicAuthentication($user, $pass);
 	}
 	
@@ -90,7 +90,7 @@ class Geoserver {
 		$coverageStores = null;
 		
 		$URL = $this->config["geoserver_url"]."rest/workspaces/".$this->config["workspace_name"]."/coveragestores.json";
-
+		$this->curl->resetCurl();
 		$this->curl->get($URL);
 		
 		if ($this->curl->error) {
@@ -124,7 +124,7 @@ class Geoserver {
 		$coverageStore = null;
 	
 		$URL = $this->config["geoserver_url"]."rest/workspaces/".$this->config["workspace_name"]."/coveragestores/".$coverageStoreName.".json";
-	
+		$this->curl->resetCurl();
 		$this->curl->get($URL);
 	
 		if ($this->curl->error) {
@@ -153,6 +153,8 @@ class Geoserver {
 		
 		$URL = $this->config["geoserver_url"]."rest/workspaces/".$this->config["workspace_name"]."/coveragestores.json";
 		
+		$this->curl->resetCurl();
+		
 		$this->curl->setOption(CURLOPT_HTTPHEADER, array("Content-Type: application/json", "Content-Length: " . strlen($json)));
 
 		$this->curl->post($URL, $json);
@@ -175,7 +177,7 @@ class Geoserver {
 		$json = $coverageStore->toJSON();
 		
 		$URL = $this->config["geoserver_url"]."rest/workspaces/".$this->config["workspace_name"]."/coveragestores/".$coverageStore->name."?recurse=true";
-
+		$this->curl->resetCurl();
 		$this->curl->delete($URL);
 		
 		if ($this->curl->error) {
@@ -190,7 +192,7 @@ class Geoserver {
 		$coverage = null;
 		
 		$URL = $this->config["geoserver_url"]."rest/workspaces/".$this->config["workspace_name"]."/coveragestores/".$coverageStoreName."/coverages/".$coverageName.".json";
-		
+		$this->curl->resetCurl();
 		$this->curl->get($URL);
 		
 		if ($this->curl->error) {
@@ -223,7 +225,7 @@ class Geoserver {
 		$json = $coverage->toJSON();
 		
 		$URL = $this->config["geoserver_url"]."rest/workspaces/".$this->config["workspace_name"]."/coveragestores/".$coverageStore->name."/coverages.json";
-		
+		$this->curl->resetCurl();
 		$this->curl->setOption(CURLOPT_HTTPHEADER, array("Content-Type: application/json", "Content-Length: " . strlen($json)));
 		
 		$this->curl->post($URL, $json);
@@ -254,7 +256,7 @@ class Geoserver {
 		$style = null;
 
 		$URL = $this->config["geoserver_url"]."rest/workspaces/".$this->config["workspace_name"]."/styles/".$styleName.".json";
-
+		$this->curl->resetCurl();
 		$this->curl->get($URL);
 	
 		if ($this->curl->error) {
@@ -287,7 +289,7 @@ class Geoserver {
 		$json = $style->toJSON();
 		
 		$URL = $this->config["geoserver_url"]."rest/workspaces/".$this->config["workspace_name"]."/styles";
-		
+		$this->curl->resetCurl();
 		$this->curl->setOption(CURLOPT_HTTPHEADER, array("Content-Type: application/json", "Content-Length: " . strlen($json)));
 		
 		$this->curl->post($URL, $json);
@@ -307,7 +309,7 @@ class Geoserver {
 		$URL = $this->config["geoserver_url"]."rest/workspaces/".$this->config["workspace_name"]."/styles/".$styleName;
 		
 		$fileData=file_get_contents($styleFile);
-		
+		$this->curl->resetCurl();
 		$this->curl->setOption(CURLOPT_HTTPHEADER, array("Content-Type: application/vnd.ogc.sld+xml", "Content-Length: " . strlen(stripslashes($fileData))));
 		
 		$this->curl->put($URL, $fileData);
@@ -333,7 +335,7 @@ class Geoserver {
 		$layer = null;
 	
 		$URL = $this->config["geoserver_url"]."rest/layers/".$layerName.".json";
-	
+		$this->curl->resetCurl();
 		$this->curl->get($URL);
 	
 		if ($this->curl->error) {
@@ -366,7 +368,7 @@ class Geoserver {
 		$json = $layer->toJSON();
 		
 		$URL = $this->config["geoserver_url"]."rest/layers/".$layer->name;
-		
+		$this->curl->resetCurl();
 		$this->curl->setOption(CURLOPT_HTTPHEADER, array("Content-Type: application/json", "Content-Length: " . strlen($json)));
 		
 		$this->curl->put($URL, $json);

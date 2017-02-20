@@ -8,7 +8,7 @@ class ServiceConfiguration {
 				"url" => "http://localhost:8080/geoserver/",
 				"workspace" => "ESENSING",
 				"user" => "admin",
-				"pass" => "geoserver" 
+				"pass" => "geoserver"
 		);
 		return $config;
 	}
@@ -17,7 +17,7 @@ class ServiceConfiguration {
 				'host' => "geometadata.dpi.inpe.br",
 				'user' => "esensing",
 				'pass' => "esensing",
-				'directory' => "/home/esensing/" 
+				'directory' => "/home/esensing/"
 		);
 		return $config;
 	}

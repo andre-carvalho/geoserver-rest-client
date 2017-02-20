@@ -22,7 +22,9 @@
         "psr-4": {
                 "Services\\": "src/services",
                 "DAO\\": "src/DAO",
-                "ValueObjects\\": "src/valueObjects"
+                "ValueObjects\\": "src/valueObjects",
+                "LibCurl\\": "src/libs",
+                "Configuration\\": "config"
         }
     },
     "scripts": {
