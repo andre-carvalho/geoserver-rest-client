@@ -39,4 +39,6 @@ The expected environment to deployment is composed for:
   php composer.phar install
   ```
   
-  note: We will need a little change on one line of the Curl.php code from php-curl-class after install because the put method don't work for me. I will change it using the correct way on a second moment. On file Curl.php in line 307, where we see *http_build_query($data)* i changed to $this->postFields($data)
+  ~~note: We will need a little change on one line of the Curl.php code from php-curl-class after install because the put method don't work for me. I will change it using the correct way on a second moment. On file Curl.php in line 307, where we see *http_build_query($data)* i changed to $this->postFields($data)~~
+  
+  I made it of the correct form. Extended Curl class.
